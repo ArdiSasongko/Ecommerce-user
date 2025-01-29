@@ -41,8 +41,10 @@ func (a *Application) Mount() *fiber.App {
 	v1 := r.Group("/v1")
 	authentication := v1.Group("/authentication")
 
-	authentication.Post("/register/user", a.handler.User.CreateUser)
-	authentication.Post("/register/admin", a.handler.User.CreateUser)
+	authentication.Post("/register/user", a.handler.User.Register)
+	authentication.Post("/register/admin", a.handler.User.Register)
+
+	authentication.Post("/login", a.handler.User.Login)
 
 	return r
 }

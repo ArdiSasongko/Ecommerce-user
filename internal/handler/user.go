@@ -17,7 +17,7 @@ type UserHandler struct {
 	service service.Service
 }
 
-func (s *UserHandler) CreateUser(ctx *fiber.Ctx) error {
+func (s *UserHandler) Register(ctx *fiber.Ctx) error {
 	payload := new(model.UserPaylod)
 
 	if err := ctx.BodyParser(payload); err != nil {
@@ -35,8 +35,8 @@ func (s *UserHandler) CreateUser(ctx *fiber.Ctx) error {
 	}
 
 	if err := payload.Validate(); err != nil {
-		log.WithError(fiber.ErrBadRequest).Error("validate error :%w", err)
 		errs := utils.ValidationError(err.(validator.ValidationErrors))
+		log.WithError(fiber.ErrBadRequest).Error("validate error :%w", errs)
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": errs,
 		})
@@ -51,5 +51,36 @@ func (s *UserHandler) CreateUser(ctx *fiber.Ctx) error {
 
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "ok",
+	})
+}
+
+func (s *UserHandler) Login(ctx *fiber.Ctx) error {
+	payload := new(model.LoginPayload)
+
+	if err := ctx.BodyParser(payload); err != nil {
+		log.WithError(fiber.ErrBadRequest).Error("Body Parser :%w", err)
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	if err := payload.Validate(); err != nil {
+		errs := utils.ValidationError(err.(validator.ValidationErrors))
+		log.WithError(fiber.ErrBadRequest).Error("validate error :%w", errs)
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": errs,
+		})
+	}
+
+	resp, err := s.service.User.Login(ctx.Context(), payload)
+	if err != nil {
+		log.WithError(fiber.ErrInternalServerError).Error("error :%w", err)
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data": resp,
 	})
 }

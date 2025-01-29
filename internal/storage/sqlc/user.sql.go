@@ -11,6 +11,80 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, username, email, phone_number, address, dob, password, fullname, role, created_at, updated_at FROM users WHERE email = $1
+`
+
+type GetUserByEmailRow struct {
+	ID          int32
+	Username    string
+	Email       string
+	PhoneNumber string
+	Address     string
+	Dob         pgtype.Date
+	Password    string
+	Fullname    string
+	Role        int32
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i GetUserByEmailRow
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.PhoneNumber,
+		&i.Address,
+		&i.Dob,
+		&i.Password,
+		&i.Fullname,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByID = `-- name: GetUserByID :one
+SELECT id, username, email, phone_number, address, dob, password, fullname, role, created_at, updated_at FROM users WHERE id = $1
+`
+
+type GetUserByIDRow struct {
+	ID          int32
+	Username    string
+	Email       string
+	PhoneNumber string
+	Address     string
+	Dob         pgtype.Date
+	Password    string
+	Fullname    string
+	Role        int32
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
+}
+
+func (q *Queries) GetUserByID(ctx context.Context, id int32) (GetUserByIDRow, error) {
+	row := q.db.QueryRow(ctx, getUserByID, id)
+	var i GetUserByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.PhoneNumber,
+		&i.Address,
+		&i.Dob,
+		&i.Password,
+		&i.Fullname,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getUserByUsername = `-- name: GetUserByUsername :one
 SELECT id, username, email, phone_number, address, dob, password, fullname, role, created_at, updated_at FROM users WHERE username = $1
 `

@@ -3,3 +3,9 @@ INSERT INTO users (username, email, phone_number, address, dob, password, fullna
 
 -- name: GetUserByUsername :one
 SELECT id, username, email, phone_number, address, dob, password, fullname, role, created_at, updated_at FROM users WHERE username = $1;
+
+-- name: GetUserByEmail :one
+SELECT id, username, email, phone_number, address, dob, password, fullname, role, created_at, updated_at FROM users WHERE email = $1;
+
+-- name: GetUserByID :one
+SELECT id, username, email, phone_number, address, dob, password, fullname, role, created_at, updated_at FROM users WHERE id = $1;
