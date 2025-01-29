@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: postgres-ecommerce
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: ecommerce-user
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 127.0.0.1:5432:5432
+
+volumes:
+  postgres_data:
