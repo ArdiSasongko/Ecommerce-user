@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 
+	"github.com/ArdiSasongko/Ecommerce-user/internal/config/auth"
 	"github.com/ArdiSasongko/Ecommerce-user/internal/config/env"
 	"github.com/ArdiSasongko/Ecommerce-user/internal/config/logger"
 	"github.com/ArdiSasongko/Ecommerce-user/internal/config/pg"
@@ -63,8 +64,8 @@ func SetupHTTPApplication() (*Application, error) {
 		cfg.log.Fatalf("failed to connected database :%v", err)
 	}
 
-	//auth := auth.NewJWT(cfg.auth.secret, cfg.auth.aud, cfg.auth.iss)
-	handler := handler.NewHandler(Conn)
+	auth := auth.NewJWT(cfg.auth.secret, cfg.auth.aud, cfg.auth.iss)
+	handler := handler.NewHandler(Conn, auth)
 	return &Application{
 		config:  cfg,
 		handler: handler,
