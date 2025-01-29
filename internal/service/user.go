@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/ArdiSasongko/Ecommerce-user/internal/config/auth"
@@ -154,5 +155,59 @@ func (s *UserService) Login(ctx context.Context, payload *model.LoginPayload) (*
 	return &model.LoginResponse{
 		ActiveToken:  active_token,
 		RefreshToken: refresh_token,
+	}, nil
+}
+
+func (s *UserService) RefreshToken(ctx context.Context, userID int32) (*model.LoginResponse, error) {
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	qtx := s.q.WithTx(tx)
+
+	token, err := qtx.GetSessionByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	expRefreshToken := token.RefreshTokenExpiresAt.Time.Truncate(time.Second)
+	now := time.Now().Truncate(time.Second).UTC().Add(time.Hour * 7)
+
+	if now.After(expRefreshToken) {
+		if err := qtx.DeleteSession(ctx, sqlc.DeleteSessionParams{
+			UserID:      userID,
+			ActiveToken: token.ActiveToken,
+		}); err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("refresh token has expired please login again")
+	}
+
+	newToken, err := s.auth.GeneratedToken(userID, "active_token")
+	if err != nil {
+		return nil, err
+	}
+
+	if err := qtx.UpdateSession(ctx, sqlc.UpdateSessionParams{
+		ActiveToken: newToken,
+		ActiveTokenExpiresAt: pgtype.Timestamp{
+			Time:  time.Now().Add(auth.TokenTime["active_token"]),
+			Valid: true,
+		},
+		RefreshToken: token.RefreshToken,
+		UserID:       userID,
+	}); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+
+	return &model.LoginResponse{
+		ActiveToken:  newToken,
+		RefreshToken: token.RefreshToken,
 	}, nil
 }
