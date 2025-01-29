@@ -14,6 +14,10 @@ type Handler struct {
 	User interface {
 		Register(*fiber.Ctx) error
 		Login(*fiber.Ctx) error
+		Refresh(*fiber.Ctx) error
+	}
+	Middleware interface {
+		TokenMiddleware() fiber.Handler
 	}
 }
 
@@ -23,6 +27,10 @@ func NewHandler(db *pgxpool.Pool, auth auth.JWTAuth) Handler {
 		Health: &HealthHandler{},
 		User: &UserHandler{
 			service: service,
+		},
+		Middleware: &MiddlewareHandler{
+			service: service,
+			auth:    auth,
 		},
 	}
 }

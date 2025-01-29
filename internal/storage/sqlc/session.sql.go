@@ -11,6 +11,20 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const deleteSession = `-- name: DeleteSession :exec
+DELETE FROM user_session WHERE user_id = $1 AND active_token = $2
+`
+
+type DeleteSessionParams struct {
+	UserID      int32
+	ActiveToken string
+}
+
+func (q *Queries) DeleteSession(ctx context.Context, arg DeleteSessionParams) error {
+	_, err := q.db.Exec(ctx, deleteSession, arg.UserID, arg.ActiveToken)
+	return err
+}
+
 const getSessionByActiveToken = `-- name: GetSessionByActiveToken :one
 SELECT id, user_id, active_token, refresh_token, active_token_expires_at, refresh_token_expires_at, created_at, updated_at FROM user_session WHERE active_token = $1
 `
@@ -74,4 +88,25 @@ func (q *Queries) InsertSession(ctx context.Context, arg InsertSessionParams) (i
 	var id int32
 	err := row.Scan(&id)
 	return id, err
+}
+
+const updateSession = `-- name: UpdateSession :exec
+UPDATE user_session SET active_token = $1, active_token_expires_at = $2 WHERE refresh_token = $3 AND user_id = $4
+`
+
+type UpdateSessionParams struct {
+	ActiveToken          string
+	ActiveTokenExpiresAt pgtype.Timestamp
+	RefreshToken         string
+	UserID               int32
+}
+
+func (q *Queries) UpdateSession(ctx context.Context, arg UpdateSessionParams) error {
+	_, err := q.db.Exec(ctx, updateSession,
+		arg.ActiveToken,
+		arg.ActiveTokenExpiresAt,
+		arg.RefreshToken,
+		arg.UserID,
+	)
+	return err
 }

@@ -13,6 +13,10 @@ type Service struct {
 	User interface {
 		InsertUser(context.Context, *model.UserPaylod) error
 		Login(context.Context, *model.LoginPayload) (*model.LoginResponse, error)
+		RefreshToken(context.Context, int32) (*model.LoginResponse, error)
+	}
+	Session interface {
+		TokenByToken(context.Context, string) (sqlc.UserSession, error)
 	}
 }
 
@@ -23,6 +27,9 @@ func NewService(db *pgxpool.Pool, auth auth.JWTAuth) Service {
 			q:    q,
 			db:   db,
 			auth: auth,
+		},
+		Session: &SessionService{
+			q: q,
 		},
 	}
 }

@@ -46,6 +46,7 @@ func (a *Application) Mount() *fiber.App {
 
 	authentication.Post("/login", a.handler.User.Login)
 
+	authentication.Patch("/refresh", a.handler.Middleware.TokenMiddleware(), a.handler.User.Refresh)
 	return r
 }
 
