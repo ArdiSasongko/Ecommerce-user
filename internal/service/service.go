@@ -14,6 +14,7 @@ type Service struct {
 		InsertUser(context.Context, *model.UserPaylod) error
 		Login(context.Context, *model.LoginPayload) (*model.LoginResponse, error)
 		RefreshToken(context.Context, int32) (*model.LoginResponse, error)
+		DeleteSession(context.Context, int32) error
 	}
 	Session interface {
 		TokenByToken(context.Context, string) (sqlc.UserSession, error)

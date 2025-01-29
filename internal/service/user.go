@@ -211,3 +211,19 @@ func (s *UserService) RefreshToken(ctx context.Context, userID int32) (*model.Lo
 		RefreshToken: token.RefreshToken,
 	}, nil
 }
+
+func (s *UserService) DeleteSession(ctx context.Context, userID int32) error {
+	token, err := s.q.GetSessionByUserID(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	if err := s.q.DeleteSession(ctx, sqlc.DeleteSessionParams{
+		UserID:      userID,
+		ActiveToken: token.ActiveToken,
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
