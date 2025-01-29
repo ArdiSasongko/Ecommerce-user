@@ -101,3 +101,20 @@ func (s *UserHandler) Refresh(ctx *fiber.Ctx) error {
 		"data": resp,
 	})
 }
+
+func (s *UserHandler) Logout(ctx *fiber.Ctx) error {
+	id := ctx.Locals("user_id").(int64)
+	log.Println(id)
+
+	if err := s.service.User.DeleteSession(ctx.Context(), int32(id)); err != nil {
+		log.WithError(fiber.ErrInternalServerError).Error("error :%w", err)
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "ok",
+	})
+
+}
