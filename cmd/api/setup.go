@@ -22,6 +22,12 @@ func LoadConfig() (Config, error) {
 	config := Config{
 		addrHTTP: env.GetEnvString("ADDR_HTTP", ""),
 		log:      logger,
+		db: DBConfig{
+			addr:         env.GetEnvString("DB_ADDR", ""),
+			maxOpenConns: env.GetEnvInt("DB_MAX_CONNS", 5),
+			maxIdleConns: env.GetEnvInt("DB_MAX_IDLE", 1),
+			maxIdleTime:  env.GetEnvString("DB_MAX_TIME_IDLE", ""),
+		},
 		auth: AuthConfig{
 			secret: env.GetEnvString("JWT_SECRET", ""),
 			iss:    env.GetEnvString("JWT_ISS", ""),
@@ -52,13 +58,13 @@ func SetupHTTPApplication() (*Application, error) {
 		cfg.log.Fatalf("%s", err.Error())
 	}
 
-	// _, err = ConnDatabase(cfg.db, cfg.log)
-	// if err != nil {
-	// 	cfg.log.Fatalf("failed to connected database :%v", err)
-	// }
+	Conn, err := ConnDatabase(cfg.db, cfg.log)
+	if err != nil {
+		cfg.log.Fatalf("failed to connected database :%v", err)
+	}
 
 	//auth := auth.NewJWT(cfg.auth.secret, cfg.auth.aud, cfg.auth.iss)
-	handler := handler.NewHandler()
+	handler := handler.NewHandler(Conn)
 	return &Application{
 		config:  cfg,
 		handler: handler,
