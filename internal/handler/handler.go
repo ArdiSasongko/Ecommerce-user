@@ -16,6 +16,7 @@ type Handler struct {
 		Login(*fiber.Ctx) error
 		Logout(*fiber.Ctx) error
 		Refresh(*fiber.Ctx) error
+		Profile(*fiber.Ctx) error
 	}
 	Middleware interface {
 		TokenMiddleware() fiber.Handler

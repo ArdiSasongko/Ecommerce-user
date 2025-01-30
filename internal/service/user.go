@@ -92,6 +92,24 @@ func (s *UserService) InsertUser(ctx context.Context, payload *model.UserPaylod)
 	return nil
 }
 
+func (s *UserService) GetUserByID(ctx context.Context, id int32) (*model.UserResponse, error) {
+	user, err := s.q.GetUserByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.UserResponse{
+		Username:    user.Username,
+		Email:       user.Email,
+		PhoneNumber: user.PhoneNumber,
+		Address:     user.Address,
+		DoB:         user.Dob.Time.Format(layout),
+		Password:    user.Password,
+		Fullname:    user.Fullname,
+		Role:        user.Role,
+	}, nil
+}
+
 func (s *UserService) getUserEmail(ctx context.Context, email string) (sqlc.GetUserByEmailRow, error) {
 	user, err := s.q.GetUserByEmail(ctx, email)
 	if err != nil {

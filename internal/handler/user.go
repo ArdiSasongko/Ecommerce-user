@@ -85,6 +85,22 @@ func (s *UserHandler) Login(ctx *fiber.Ctx) error {
 	})
 }
 
+func (s *UserHandler) Profile(ctx *fiber.Ctx) error {
+	id := ctx.Locals("user_id").(int64)
+
+	resp, err := s.service.User.GetUserByID(ctx.Context(), int32(id))
+	if err != nil {
+		log.WithError(fiber.ErrInternalServerError).Error("error :%w", err)
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data": resp,
+	})
+}
+
 func (s *UserHandler) Refresh(ctx *fiber.Ctx) error {
 	id := ctx.Locals("user_id").(int64)
 	log.Println(id)
