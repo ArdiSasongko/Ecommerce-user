@@ -99,6 +99,7 @@ func (s *UserService) GetUserByID(ctx context.Context, id int32) (*model.UserRes
 	}
 
 	return &model.UserResponse{
+		ID:          user.ID,
 		Username:    user.Username,
 		Email:       user.Email,
 		PhoneNumber: user.PhoneNumber,

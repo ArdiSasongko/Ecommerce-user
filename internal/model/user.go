@@ -36,6 +36,7 @@ func (u LoginPayload) Validate() error {
 
 type (
 	UserResponse struct {
+		ID          int32  `json:"id"`
 		Username    string `json:"username"`
 		Email       string `json:"email"`
 		PhoneNumber string `json:"phone_number"`
